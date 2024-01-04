@@ -1,23 +1,22 @@
 # -*- coding: utf-8 -*-
 """
 Created on Sat Nov 20 22:10:14 2021
-
 @author: patri
 """
 
-#Purpose: Query database using SQL
-#Name: Your name
-#Date: Your date
-# Run BuildWeatherDB.py to build weather database before running this program
+# Purpose: Query database using SQL
+# Name: Patrick Wesley
+# Edited Date: 01/04/2024
+# Run BuildWeatherDB.py to build the weather database before running this program
 
 import sqlite3
 import pandas as pd
 
-#file names for database and output file
+# File names for the database and output file
 
-dbFile = "weather_B.db"
+db_file = "weather_B.db"
 
-#format output
+# Format output
 
 pd.set_option('display.max_rows', None)
 pd.set_option('display.max_columns', None)
@@ -25,17 +24,17 @@ pd.set_option('display.width', None)
 pd.set_option('display.max_colwidth', None)
 pd.set_option('display.expand_frame_repr', False)
 
-#connect to and query weather database
+# Connect to and query the weather database
 
-conn = sqlite3.connect(dbFile)
+conn = sqlite3.connect(db_file)
 
-#Create SQL command
+# Create SQL command
 
-selectCmd = " SELECT * FROM observations ORDER BY timestamp; "
-#"SELECT temperature, windspeed, textDescription FROM observations where textDescription = 'Clear'; "
-#" SELECT MIN(temperature), MAX(temperature) FROM observations; " 
+select_cmd = " SELECT * FROM observations ORDER BY timestamp; "
+# "SELECT temperature, windspeed, textDescription FROM observations where textDescription = 'Clear'; "
+# " SELECT MIN(temperature), MAX(temperature) FROM observations; "
 
-#print out the query
+# Print out the query
 
-result = pd.read_sql_query(selectCmd, conn)
+result = pd.read_sql_query(select_cmd, conn)
 print(result)
