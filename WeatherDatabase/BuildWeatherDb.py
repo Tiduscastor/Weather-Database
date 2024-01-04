@@ -1,43 +1,38 @@
-#Purpose: Build weather database from NOAA data
-#Name: Patrick Wesley
-#Date: 11/11/2021
+# Purpose: Build weather database from NOAA data
+# Name: Patrick Wesley
+# Date: 11/11/2021
+# Edited on: 01/04/2024
 # See https://pypi.org/project/noaa-sdk/ for details on noaa_sdk package used
 
 from noaa_sdk import noaa
 import sqlite3
 import datetime
 
-# parameters for retrieving NOAA weather data
-
-zipCode = "37167" # change to your postal code
+# Parameters for retrieving NOAA weather data
+zip_code = "37167"  # change to your postal code
 country = "US"
 
-#date-time format is yyyy-mm-ddThh:mm:ssZ, times are Zulu time (GMT)
-#gets the most recent 14 days of data
-
+# Date-time format is yyyy-mm-ddThh:mm:ssZ, times are Zulu time (GMT)
+# Gets the most recent 14 days of data
 today = datetime.datetime.now()
 past = today - datetime.timedelta(days=14)
-startDate = past.strftime("%Y-%m-%dT00:00:00Z")
-endDate = today.strftime("%Y-%m-%dT23:59:59Z")
+start_date = past.strftime("%Y-%m-%dT00:00:00Z")
+end_date = today.strftime("%Y-%m-%dT23:59:59Z")
 
-#create connection - this creates database if not exist
-
+# Create connection - this creates a database if not exist
 print("Preparing database...")
-dbFile = "weather_B.db"
-conn = sqlite3.connect(dbFile)
+db_file = "weather_B.db"
+conn = sqlite3.connect(db_file)
 
-#create cursor to execute SQL commands
-
+# Create cursor to execute SQL commands
 cur = conn.cursor()
 
-#drop previous version of table if any so we start fresh each time
+# Drop the previous version of the table if any, so we start fresh each time
+drop_table_cmd = "DROP TABLE IF EXISTS observations;"
+cur.execute(drop_table_cmd)
 
-dropTableCmd = "DROP TABLE IF EXISTS observations;"
-cur.execute(dropTableCmd)
-
-#create new table to store observations
-
-createTableCmd = """ CREATE TABLE IF NOT EXISTS observations (
+# Create a new table to store observations
+create_table_cmd = """ CREATE TABLE IF NOT EXISTS observations (
 timestamp TEXT NOT NULL PRIMARY KEY,
 windSpeed REAL,
 temperature REAL,
@@ -47,21 +42,18 @@ barometricPressure INTEGER,
 visibility INTEGER,
 textDescription TEXT
 ) ; """
-
-cur.execute(createTableCmd)
+cur.execute(create_table_cmd)
 print("Database prepared")
 
 # Get hourly weather observations from NOAA Weather Service API
-
 print("Getting weather data...")
 n = noaa.NOAA()
-observations = n.get_observations(zipCode,country,startDate,endDate)
+observations = n.get_observations(zip_code, country, start_date, end_date)
 
-#populate table with weather observations
-
+# Populate the table with weather observations
 print("Inserting rows...")
 
-insertCmd = """ INSERT INTO observations
+insert_cmd = """ INSERT INTO observations
 (timestamp, windSpeed, temperature, relativeHumidity,
 windDirection, barometricPressure, visibility, textDescription)
 VALUES
@@ -69,15 +61,17 @@ VALUES
 
 count = 0
 for obs in observations:
-    insertValues = (obs["timestamp"],
-                    obs["windSpeed"]["value"],
-                    obs["temperature"]["value"],
-                    obs["relativeHumidity"]["value"],
-                    obs["windDirection"]["value"],
-                    obs["barometricPressure"]["value"],
-                    obs["visibility"]["value"],
-                    obs["textDescription"])
-    cur.execute(insertCmd, insertValues)
+    insert_values = (
+        obs["timestamp"],
+        obs["windSpeed"]["value"],
+        obs["temperature"]["value"],
+        obs["relativeHumidity"]["value"],
+        obs["windDirection"]["value"],
+        obs["barometricPressure"]["value"],
+        obs["visibility"]["value"],
+        obs["textDescription"],
+    )
+    cur.execute(insert_cmd, insert_values)
     count += 1
 
 if count > 0:
